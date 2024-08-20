@@ -4,7 +4,7 @@ import App from './App';
 import { BrowserRouter } from 'react-router-dom';
 import { FirebaseProvider } from "./Firebase"
 // import RouteMain from './Routes';
-import { store } from './store';
+import { store } from './Store';
 import { Provider } from 'react-redux';
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
