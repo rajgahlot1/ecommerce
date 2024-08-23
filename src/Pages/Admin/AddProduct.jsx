@@ -1,79 +1,63 @@
-import { useState ,useEffect} from "react"
-import { useNavigate, useParams } from "react-router-dom";
+import { useState } from "react"
+import { useNavigate } from "react-router-dom";
 import { toast} from "react-toastify";
-import { updateDoc, doc, getDoc } from "firebase/firestore";
+import { collection, addDoc } from "firebase/firestore";
 import { useFirebase } from "../../Firebase";
-
 export default function AddProductPage(){
-  const navigate=useNavigate();
-  const firebase = useFirebase();
+  const firebase=useFirebase();
+  // niche dek mene ese kar diya sahi hai
+ const navigate=useNavigate();
+ const cathArr=[
+   {name:"Fashion"},
+   {name:"Shirt"},
+   {name:"Jacket"},
+   {name:"Mobile"},
+   {name:"Laptop"},
+   {name:"Shoes"},
+   {name:"Home"},
+  {name:"Books"},
+ ]
+ // product state
+ const now = new Date();
+ const time = now.toLocaleTimeString([], {
+   hour: '2-digit',
+   minute: '2-digit',
+   hour12: true,
+ });
+ const [product,setProduct]=useState({
+   title:"",
+   price:"",
+   productImgUrl:"",
+   category:"",
+   description:"",
+   quanity:1,
+   date: new Date().toLocaleString("en-us", {
+     month: "short",
+     day: "2-digit",
+     year: "numeric",
+   }),
+   time:time,
+   
+ });
+ // Function to handle form submission
+ const handleSubmit = async (e) => {
+   e.preventDefault();
 
-  // const fireDb= fire base.database;
-  const cathArr=[
-    {name:"Fashion"},
-    {name:"Shirt"},
-    {name:"Jacket"},
-    {name:"Mobile"},
-    {name:"Laptop"},
-    {name:"Shoes"},
-    {name:"Home"},
-   {name:"Books"},
-  ]
-  const { id } = useParams();
-  console.log("id=>",id)
-  // product state
-  const now = new Date();
-  const time = now.toLocaleTimeString([], {
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: true,
-  });
-  const [product,setProduct]=useState({
-    title:"",
-    price:"",
-    productImgUrl:"",
-    category:"",
-    description:"",
-    quanity:1,
-    date: new Date().toLocaleString("en-us", {
-      month: "short",
-      day: "2-digit",
-      year: "numeric",
-    }),
-    time:time,
-    
-  });
-  useEffect(() => {
-    const fetchProduct = async () => {
-      try {
-        const productRef = doc(firebase.database, "products", id);
-        const productSnap = await getDoc(productRef);
-        if (productSnap.exists()) {
-          setProduct(productSnap.data());
-        } else {
-          console.log("No such product!");
-        }
-      } catch (error) {
-        console.error("Error fetching product:", error);
-      }
-    };
-
-    fetchProduct();
-  }, [id, firebase.database]);
-  // Function to handle form submission
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    try {
-      const productRef = doc(firebase.database, 'products', id);
-      await updateDoc(productRef, product);
-      toast.success("Product updated successfully!");
-      navigate('/AdminDashboard');
-    } catch (error) {
-      console.error("Error updating document: ", error);
-      toast.error("Failed to update product. Please try again.");
-    }
-  };
+   try {
+       const productRef = collection(firebase.database, 'products');
+       await addDoc(productRef, product)
+       toast.success("Add product successfully!");
+       navigate('/ecommerce/admin-dashboard')
+       // setLoading(false)
+   }catch (error) {
+     console.error("Error adding document: ", error);
+     // Error toast दिखाएं
+     toast.error("Failed to add product. Please try again.", {
+       position: toast.POSITION.TOP_CENTER,
+       autoClose: 3000,
+     });
+   }
+ }
   return(
     <>
     <div className="d-flex text-center  w-100 align-items-center justify-content-center" style={{height:"100vh"}}>
@@ -127,7 +111,7 @@ export default function AddProductPage(){
           <input
              className="iinputt p-2"
             type="text"
-            value={product.productImgUrl}
+            value={product.productImgUrl} 
             onChange={(e)=>{
               setProduct({
                 ...product,

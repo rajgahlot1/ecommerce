@@ -13,28 +13,36 @@ import UpdateProduct from "./Pages/Admin/UpdateProduct";
 import ProductInfo from "./Pages/ProductInfo";
 import AddProduct from "./Pages/Admin/AddProduct";
 import ProtectedRouteForUser from "./ProtectedRoute/ProtectedRouteForUser";
-// import Welcome from './Components/Welcome';
+import Welcome from './Components/Welcome';
 import ProtectedRouteForAdmin from "./ProtectedRoute/ProtectedRouteForAdmin";
 import Category from "./Pages/Category";
+import { useEffect, useState } from "react";
 // import { useFirebase } from "./Firebase";
 // import Login from './Components/Login'
 // import Login from './Components/Login'
-
 const RouteMain = () => {
   // const firebase = useFirebase();
   // const [loggedin, setLoggedin] = useState(false);
+  const [showWelcomePage, setShowWelcomePage] = useState(true);
 
   // useEffect(() => {
   //   setLoggedin(firebase.isLoggedIn);
   // }, [firebase]);
+  useEffect(() => {
+    // 3 seconds ke baad welcome page hide karne ke liye
+    const timer = setTimeout(() => {
+      setShowWelcomePage(false);
+    }, 3000); // 3000 milliseconds = 3 seconds
 
-  // const [showWelcomePage, setShowWelcomePage] = useState(true);
+    return () => clearTimeout(timer); // Cleanup timer on unmount
+  }, []);
+
   // const handleRedirect = () => {
   //   setShowWelcomePage(false);
   // };
   return (
     <Routes>
-      <Route path="/ecommerce" element={<Home />} />
+      <Route path="/ecommerce" element={showWelcomePage ? <Welcome />: <Home/>} />
       <Route path="/ecommerce/category/:categoryName" element={<Category />} />
 
       <Route path="/ecommerce/productinfo/:id" element={<ProductInfo />} />

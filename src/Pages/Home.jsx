@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import img1 from '../imgs/img1.png'
 import img2 from '../imgs/img2.png'
 import Carousel from 'react-bootstrap/Carousel';
@@ -11,7 +11,9 @@ import Testimonial from '../Components/Testimonial';
 // import Nav from "./Nav.js"
 import Category from '../Components/Category';
 const Home = () => {
-
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
     return (
     <Layout>
 

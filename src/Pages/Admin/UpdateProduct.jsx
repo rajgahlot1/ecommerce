@@ -5,45 +5,46 @@ import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { useFirebase } from "../../Firebase";
 
 export default function UpdateProduct(){
-  const navigate=useNavigate();
   const firebase = useFirebase();
   const { id } = useParams();
   console.log("id=>",id)
   
-  // const fireDb= firebase.database;
-  const cathArr=[
-    {name:"Fashion"},
-    {name:"Shirt"},
-    {name:"Jacket"},
-    {name:"Mobile"},
-    {name:"Laptop"},
-    {name:"Shoes"},
-    {name:"Home"},
-   {name:"Books"},
-  ]
-  // product state
-  const now = new Date();
-  const time = now.toLocaleTimeString([], {
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: true,
-  });
-  const [product,setProduct]=useState({
-    title:"",
-    price:"",
-    productImgUrl:"",
-    category:"",
-    description:"",
-    quanity:1,
-    date: new Date().toLocaleString("en-us", {
-      month: "short",
-      day: "2-digit",
-      year: "numeric",
-    }),
-    time:time,
-    
-  });
-  
+  // niche dek mene ese kar diya sahi hai
+ const navigate=useNavigate();
+ const cathArr=[
+   {name:"Fashion"},
+   {name:"Shirt"},
+   {name:"Jacket"},
+   {name:"Mobile"},
+   {name:"Laptop"},
+   {name:"Shoes"},
+   {name:"Home"},
+  {name:"Books"},
+ ]
+ // product state
+ const now = new Date();
+ const time = now.toLocaleTimeString([], {
+   hour: '2-digit',
+   minute: '2-digit',
+   hour12: true,
+ });
+ const [product,setProduct]=useState({
+   title:"",
+   price:"",
+   productImgUrl:"",
+   category:"",
+   description:"",
+   quanity:1,
+   date: new Date().toLocaleString("en-us", {
+     month: "short",
+     day: "2-digit",
+     year: "numeric",
+   }),
+   time:time,
+
+ });
+
+  // Ye code product details ko fetch karne ke liye hai
   useEffect(() => {
     const fetchProduct = async () => {
       try {
@@ -61,9 +62,8 @@ export default function UpdateProduct(){
 
     fetchProduct();
   }, [id, firebase.database]);
-  // const data = firebase.userData;
-  // console.log("danger si:",data?.userId)
-  // Function to handle form submission
+  
+  // Ye code form submit karne par Firestore mein product ko update karega
   const handleSubmit = async (e) => {
     e.preventDefault();
 

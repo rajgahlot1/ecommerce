@@ -17,14 +17,15 @@ const FirebaseContext = createContext(null);
 
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAhBD1KUTsvU9jDNhp2sbRnQv4qFb98qLI",
-  authDomain: "mywebsite-fc538.firebaseapp.com",
-  projectId: "mywebsite-fc538",
-  storageBucket: "mywebsite-fc538.appspot.com",
-  messagingSenderId: "1022410542049",
-  appId: "1:1022410542049:web:d199d0b9199c21d5c2a0a0",
-  measurementId: "G-8EDLV6RGX7"
+  apiKey: "AIzaSyAG2hrNq89YtTqa054NFmE4NkgE0trUOxY",
+  authDomain: "ecommerce-73a90.firebaseapp.com",
+  projectId: "ecommerce-73a90",
+  storageBucket: "ecommerce-73a90.appspot.com",
+  messagingSenderId: "1056029288628",
+  appId: "1:1056029288628:web:ede4ca5730d7476da50fe1",
+  measurementId: "G-XMJ4WJ7551"
 };
+
 
 const firebaseApp = initializeApp(firebaseConfig);
 const database = getFirestore(firebaseApp);
@@ -121,7 +122,7 @@ useEffect(() => {
       } 
     }
    
-    
+   const [myId,setmyId]=useState() 
     async function getUserData(userId) {
       try {
         const userRef = doc(database, 'users', userId);
@@ -129,8 +130,8 @@ useEffect(() => {
     
         if (userSnapshot.exists()) {
           const userData = userSnapshot.data();
+          setmyId(userData.userId)
           // setUserData(userData); // Set the fetched data into the state
-
           return userData;
         } else {
           console.log("No such user!");
@@ -172,6 +173,7 @@ useEffect(() => {
     useEffect(() => {
       getAllOrderFunction(); // Component mount hone par products fetch karein
     }, []);
+   
     const SignInWithGoogle = () => signInWithPopup(firebaseAuth, GoogleProvider);
   return (
     <FirebaseContext.Provider
@@ -188,6 +190,7 @@ useEffect(() => {
         getAllProduct,
         getAllProductFunction,
         getAllOrder,
+        myId
       }}
     >
       {props.children}

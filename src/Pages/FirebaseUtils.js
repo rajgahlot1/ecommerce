@@ -1,54 +1,65 @@
-// firebaseUtils.js
+import { doc, getDoc, setDoc, updateDoc, deleteDoc, collection, addDoc } from "firebase/firestore";
 
-import { doc, updateDoc, arrayUnion, arrayRemove, getDoc, setDoc, collection, setDoc as setCollectionDoc } from 'firebase/firestore';
-
-// Function to fetch user cart items from Firestore
-export const fetchUserCartItems = async (database, userId) => {
-  const userCartRef = doc(database, 'users', userId, "cart1", "cartItems");
-  const userDoc = await getDoc(userCartRef);
-  return userDoc.exists() ? userDoc.data().cart || [] : [];
-};
-
-// Function to modify cart (add or remove items)
-export const modifyCart = async (database, userId, product, action) => {
-    const userCartRef = doc(database, 'users', userId, "cart1", "cartItems");
-    try {
-      const cartDoc = await getDoc(userCartRef);
-      if (!cartDoc.exists()) await setDoc(userCartRef, { cart: [] });
-      const updateMethod = action === 'add' ? arrayUnion : arrayRemove;
-      await updateDoc(userCartRef, { cart: updateMethod({ ...product, quantity: 1 }) });
-      console.log(`Product ${action === 'add' ? 'added to' : 'removed from'} cart successfully!`);
-    } catch (error) {
-      console.error(`Error ${action === 'add' ? 'adding to' : 'removing from'} cart:`, error);
-    }
-  };
-  
-
-// Function to save cart to Firestore
-export const saveCartToFirestore = async (database, userId, cartItems) => {
-  const cartRef = doc(database, 'users', userId, "cart1", "cartItems");
-  await updateDoc(cartRef, { cartItems });
-  console.log("Cart updated in Firestore");
-};
-
-// Function to delete an item from the cart in Firestore
-export const deleteCartItem = async (database, userId, item) => {
-  const cartRef = doc(database, 'users', userId, "cart1", "cartItems");
-  const cartDoc = await getDoc(cartRef);
-  if (cartDoc.exists()) {
-    const updatedCartItems = cartDoc.data().cart.filter(cartItem => cartItem.productId !== item.id);
-    await updateDoc(cartRef, { cart: updatedCartItems });
-    console.log("Delete success: Cart updated in Firestore");
+export const fetchUserCartItems = async (db, userId) => {
+  try {
+    const docRef = doc(db, "users", userId, "cart", "items");
+    const docSnap = await getDoc(docRef);
+    return docSnap.exists() ? docSnap.data().cartItems || [] : [];
+  } catch (error) {
+    console.error("Error fetching cart items:", error);
+    throw error;
   }
 };
 
-// Function to create a new order
-export const createOrder = async (database, orderData) => {
+export const saveCartToFirestore = async (db, userId, cartItems) => {
   try {
-    const orderRef = collection(database, 'orders');
-    await setCollectionDoc(orderRef, orderData);
-    console.log("Success: Order added");
+    const docRef = doc(db, "users", userId, "cart", "items");
+    await setDoc(docRef, { cartItems }, { merge: true });
   } catch (error) {
-    console.error("Error adding order: ", error);
+    console.error("Error saving cart to Firestore:", error);
+    throw error;
+  }
+};
+
+export const deleteCartItem = async (db, userId, item) => {
+  try {
+    const docRef = doc(db, "users", userId, "cart", "items");
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      const updatedCartItems = docSnap.data().cartItems.filter(cartItem => cartItem.id !== item.id);
+      await setDoc(docRef, { cartItems: updatedCartItems }, { merge: true });
+    }
+  } catch (error) {
+    console.error("Error deleting cart item:", error);
+    throw error;
+  }
+};
+
+export const createOrder = async (db, orderData) => {
+  try {
+    const ordersCollection = collection(db, "orders");
+    await addDoc(ordersCollection, orderData);
+  } catch (error) {
+    console.error("Error creating order:", error);
+    throw error;
+  }
+};
+
+export const modifyCart = async (db, userId, product, action) => {
+  try {
+    const docRef = doc(db, "users", userId, "cart", "items");
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      let cartItems = docSnap.data().cartItems || [];
+      if (action === 'add') {
+        cartItems = [...cartItems, product];
+      } else if (action === 'remove') {
+        cartItems = cartItems.filter(item => item.id !== product.id);
+      }
+      await setDoc(docRef, { cartItems }, { merge: true });
+    }
+  } catch (error) {
+    console.error("Error modifying cart:", error);
+    throw error;
   }
 };

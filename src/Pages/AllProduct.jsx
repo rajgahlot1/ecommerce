@@ -1,5 +1,5 @@
 import React, {  useEffect } from 'react'
-import {addToCart,deleteFromCart} from '../CartSlice'
+import {addToCart,deleteFromCart} from '../redux/CartSlice'
 import { useDispatch, useSelector } from "react-redux";
 import Layout from '../Components/Layout'
 
@@ -11,26 +11,29 @@ import { useFirebase } from '../Firebase';
 // useEffect
 const AllProduct = () => {
   const firebase=useFirebase();
-  const {  getAllProduct, getAllProductFunction } = firebase;
+  const {  getAllProduct, getAllProductFunction, myId } = firebase;
           const navigate= useNavigate();
           // console.log("hello",getAllProduct)
           useEffect(() => {
             getAllProductFunction();
           }, []);
-          const cartItems=useSelector((state)=>state.cart);
-  const dispatch=useDispatch();
+          const cartItems = useSelector((state) => state.cart);
+  const dispatch = useDispatch();
 
-  const addCart=(val)=>{
+  const addCart = (val) => {
+    console.log(myId, "dgdgd");
     dispatch(addToCart(val));
-    console.log("success")
-  }
-  const deletCart=(val)=>{
-    dispatch(deleteFromCart(val))
-    console.log("delete success")
-  }
-  useEffect(()=>{
-    localStorage.setItem('cart',JSON.stringify(cartItems));
-  },[cartItems])
+    console.log("success");
+  };
+  const deletCart = (val) => {
+    dispatch(deleteFromCart(val));
+    console.log("delete success");
+  };
+
+  useEffect(() => {
+    localStorage.setItem(myId, JSON.stringify(cartItems));
+  }, [cartItems]);
+
   return (
     <Layout>
         <div><h2 className='text-center m-2'>All Product</h2>

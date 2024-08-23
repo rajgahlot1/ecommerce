@@ -1,60 +1,97 @@
-import React, { useEffect, useState } from 'react';
-import Button from 'react-bootstrap/Button';
-import Card from 'react-bootstrap/Card';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
+import { MdCurrencyRupee } from "react-icons/md";
 import { useFirebase } from "../Firebase";
-import { fetchUserCartItems, modifyCart } from '../Pages/FirebaseUtils';
+import { addToCart, deleteFromCart } from "../redux/CartSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { useEffect } from "react";
+import logo from '../imgs/logo3.png'
+export  function ProductCart() {
 
-const ProductCart = () => {
-  const [cartItems, setCartItems] = useState([]);
-  const { getAllProduct, getAllProductFunction, userData, database } = useFirebase();
+  const firebase = useFirebase();
+const { getAllProduct, myId ,getAllProductFunction} = firebase;
+useEffect(() => {
+  getAllProductFunction();
+}, []);
   const navigate = useNavigate();
+  const cartItems = useSelector((state) => state.cart);
+  const dispatch = useDispatch();
+
+  const addCart = (val) => {
+    console.log(myId, "dgdgd");
+    dispatch(addToCart(val));
+    console.log("success");
+  };
+  const deletCart = (val) => {
+    dispatch(deleteFromCart(val));
+    console.log("delete success");
+  };
 
   useEffect(() => {
-    getAllProductFunction();
-    if (userData?.userId) {
-      fetchUserCartItems(database, userData.userId).then(setCartItems);
-    }
-  }, [getAllProductFunction, userData, database]);
+    localStorage.setItem(myId, JSON.stringify(cartItems));
+  }, [cartItems]);
 
-  const handleCartModification = (product, action) => {
-    if (userData?.userId) {
-      modifyCart(database, userData.userId, product, action).then(() => {
-        fetchUserCartItems(database, userData.userId).then(setCartItems);
-      });
-    }
-  };
-  
-  const isProductInCart = (productId) => {
-    return cartItems.some(item => item.productId === productId);
-  };
-  
   return (
-    <div className='d-flex flex-wrap align-items-center justify-content-evenly'>
-      {getAllProduct.map((val) => {
-        const inCart = isProductInCart(val.id);
-        console.log(inCart)
-        return (
-          <Card style={{ width: '18rem', height: "468px" }} className='m-2' key={val.id}>
-            <Card.Img variant="top" onClick={() => navigate(`productinfo/${val.id}`)} src={val.productImgUrl} style={{ cursor: "pointer", height: "300px" }} />
-            <Card.Body className='position-relative'>
-              <Card.Title style={{ height: "53px" }}>{val.title}</Card.Title>
-              <Card.Text className='fw-bold'>
-                ₹ {val.price}
-              </Card.Text>
-              <Button
-                variant="primary"
-                className='w-100 position-relative bottom-0'
-                onClick={() => handleCartModification(val, inCart ? 'remove' : 'add')}
+    <>
+      <div className="   Card_main d-flex flex-wrap w-100 p-3 flex-column position-relative align-items-center justify-content-center">
+        <h3 className="text-center mb-4">Bestselling Products</h3>
+        <div className="d-flex gap-4 flex-wrap justify-content-center align-items-center w-100 ">
+          {getAllProduct.slice(0, 8).map((val) => {
+            const { title, price, productImgUrl } = val;
+            return (
+              <div
+                key={val.id}
+                className="card position-relative"
+                style={{
+                  width: "18rem",
+                  height: "410px",
+                  boxShadow: "0 0 10px rgba(0,0,0,0.1)",
+                }}
               >
-                {inCart ? 'Remove from Cart' : 'Add to Cart'}
-              </Button>
-            </Card.Body>
-          </Card>
-        );
-      })}
-    </div>
+                <img
+                  onClick={() => navigate(`/ProductInfo/${val.id}`)}
+                  className="card-img-top w-100 h-50"
+                  src={productImgUrl}
+                  alt="Card image cap"
+                />
+                <div
+                  className="card-body position-relative"
+                  style={{ cursor: "pointer" }}
+                >
+                  <p className="card-title" style={{ color: "gray" }}>
+                    <img src={logo} alt="" style={{height:"40px"}}/>
+                  </p>
+                  <h6 className="card-text">{title}</h6>
+                  <h5>
+                    <MdCurrencyRupee />
+                    {price}
+                  </h5>
+                  {cartItems.some((p) => p.id === val.id) ? (
+                    <button
+                      className="btnn fw-bold w-100 mt-2"
+                      style={{ borderRadius: "6px", height: "40px" }}
+                      onClick={() => deletCart(val)}
+                    >
+                      Delete To Cart
+                    </button>
+                  ) : (
+                    <button
+                      className="btnn fw-bold w-100 mt-2"
+                      style={{ borderRadius: "6px", height: "40px" }}
+                      onClick={() => addCart(val)}
+                    >
+                      Add To Cart
+                    </button>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </>
   );
-};
+}
 
-export { ProductCart };
+
+
+// ab kar ke bata
