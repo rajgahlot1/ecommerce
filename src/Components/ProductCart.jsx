@@ -1,42 +1,48 @@
+
+
 import { useNavigate } from "react-router-dom";
 import { MdCurrencyRupee } from "react-icons/md";
 import { useFirebase } from "../Firebase";
-import { addToCart, deleteFromCart } from "../redux/CartSlice";
-import { useDispatch, useSelector } from "react-redux";
-import { useEffect } from "react";
-import logo from '../imgs/logo3.png'
+import Loader from '../Loader/Loader'
+import { useEffect,useState } from "react";
+import { getDocs, collection } from "firebase/firestore";
 export  function ProductCart() {
-
   const firebase = useFirebase();
-const { getAllProduct, myId ,getAllProductFunction} = firebase;
-useEffect(() => {
-  getAllProductFunction();
-}, []);
+   const { getAllProduct, addToCart, removeFromCart, user, database } = firebase; // Destructure necessary values
   const navigate = useNavigate();
-  const cartItems = useSelector((state) => state.cart);
-  const dispatch = useDispatch();
+  const [cartItems, setCartItems] = useState([]);
+  const [loading, setLoading] = useState(false); // Loading state add karein
 
-  const addCart = (val) => {
-    console.log(myId, "dgdgd");
-    dispatch(addToCart(val));
-    console.log("success");
-  };
-  const deletCart = (val) => {
-    dispatch(deleteFromCart(val));
-    console.log("delete success");
-  };
-
+  // Fetch the cart items when the component mounts
   useEffect(() => {
-    localStorage.setItem(myId, JSON.stringify(cartItems));
-  }, [cartItems]);
+    if (user) {
+      const fetchCartItems = async () => {
+        const cartSnapshot = await getDocs(collection(database, `users/${user.uid}/cartItems`));
+        const cartList = cartSnapshot.docs.map((doc) => doc.data());
+        setCartItems(cartList.map((item) => item.id));
+        setLoading(false);
+      };
+      fetchCartItems();
+    }
+  }, [user]);
+
+  const isInCart = (productId) => cartItems.includes(productId);
+
+  if (loading) {
+    return <div className="position-relative" style={{width:"100px",right:"-45%"}}><Loader/></div> }
+ 
+
+  // Shuffle the products array
+  const shuffledProducts = [...getAllProduct].sort(() => Math.random() - 0.5);
 
   return (
     <>
-      <div className="   Card_main d-flex flex-wrap w-100 p-3 flex-column position-relative align-items-center justify-content-center">
+      <div className="Card_main d-flex flex-wrap w-100 p-3 flex-column position-relative align-items-center justify-content-center">
         <h3 className="text-center mb-4">Bestselling Products</h3>
         <div className="d-flex gap-4 flex-wrap justify-content-center align-items-center w-100 ">
-          {getAllProduct.slice(0, 8).map((val) => {
-            const { title, price, productImgUrl } = val;
+          {shuffledProducts.slice(0, 8).map((val) => {
+            const { title, price, productImgUrl,id } = val;
+       const inCart = isInCart(id);
             return (
               <div
                 key={val.id}
@@ -47,41 +53,44 @@ useEffect(() => {
                   boxShadow: "0 0 10px rgba(0,0,0,0.1)",
                 }}
               >
-                <img
-                  onClick={() => navigate(`/ProductInfo/${val.id}`)}
-                  className="card-img-top w-100 h-50"
-                  src={productImgUrl}
-                  alt="Card image cap"
-                />
+                <div className=" h-50 w-100 dalju p-1 ">
+                  <img
+                    onClick={() => navigate(`/ecommerce/productinfo/${val.id}`)}
+                    style={{ objectFit: "contain" }}
+                    className="card-img-top h-100 w-100"
+                    src={productImgUrl}
+                    alt="Card image cap"
+                  />
+                </div>
                 <div
                   className="card-body position-relative"
                   style={{ cursor: "pointer" }}
                 >
                   <p className="card-title" style={{ color: "gray" }}>
-                    <img src={logo} alt="" style={{height:"40px"}}/>
+                    Buy Smart
                   </p>
                   <h6 className="card-text">{title}</h6>
                   <h5>
                     <MdCurrencyRupee />
                     {price}
                   </h5>
-                  {cartItems.some((p) => p.id === val.id) ? (
-                    <button
-                      className="btnn fw-bold w-100 mt-2"
-                      style={{ borderRadius: "6px", height: "40px" }}
-                      onClick={() => deletCart(val)}
-                    >
-                      Delete To Cart
-                    </button>
-                  ) : (
-                    <button
-                      className="btnn fw-bold w-100 mt-2"
-                      style={{ borderRadius: "6px", height: "40px" }}
-                      onClick={() => addCart(val)}
-                    >
-                      Add To Cart
-                    </button>
-                  )}
+                  <button
+                    className="btnn fw-bold w-100 mt-2"
+                    style={{ borderRadius: "6px", height: "40px" }}
+                    onClick={() => {
+                      if (inCart) {
+                        removeFromCart(id);
+                        setCartItems((prev) =>
+                          prev.filter((item) => item !== id)
+                        );
+                      } else {
+                        addToCart(val);
+                        setCartItems((prev) => [...prev, id]);
+                      }
+                    }}
+                  >
+                    {inCart ? "Delete Product" : "Add To Cart"}
+                  </button>
                 </div>
               </div>
             );
@@ -91,7 +100,3 @@ useEffect(() => {
     </>
   );
 }
-
-
-
-// ab kar ke bata

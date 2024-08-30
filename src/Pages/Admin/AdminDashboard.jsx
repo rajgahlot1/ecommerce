@@ -4,6 +4,7 @@ import ProductDetails from '../../Components/Admin/ProductDetails';
 import { FaListOl } from "react-icons/fa6";
 import OrderDetails from '../../Components/Admin/OrderDetails';
 import UserDetails from '../../Components/Admin/UserDetails';
+import Layout from '../../Components/Layout';
 import { FiUsers } from "react-icons/fi";
 // import { Link } from 'react-router-dom';
 import img from '../../imgs/img1.png'
@@ -23,6 +24,7 @@ const AdminDashboard = () => {
   //   console.log(user)
   // },[user])
   return (
+    <Layout>
     <div style={{color:"#d62828"}} className='admin-dash'>
     <h2 className='text-center m-3 rounded p-3' style={{fontWeight:"500", border:"1px solid #ef233c", backgroundColor:"#ffc8dd"}}>Admin Dashboard</h2>
     <div className="m-4 d-flex flex-column align-items-center gap -2" style={{border:"1px solid #ef233c",borderRadius:"20px", backgroundColor:"#ffc8dd"}}>
@@ -100,7 +102,7 @@ const AdminDashboard = () => {
           </Tabs>  */}
    {/* </div>  */}
    </div>
-  )
+   </Layout>)
 }
 
 export default AdminDashboard

@@ -44,7 +44,6 @@ const Home = () => {
      </Carousel>
    );
  }
- 
  const ItemData=({indx})=>{
     const tradeInOffers = [
         {

@@ -1,15 +1,15 @@
-import React, { useEffect } from 'react';
+// ismport React, { useEffect } from 'react';
 import gif from '../imgs/gif.gif'
 
-const WelcomePage = ({onRedirect}) => {
+const WelcomePage = () => {
   
-    useEffect(() => {
-        const timer = setTimeout(() => {
-          onRedirect();
-        }, 4000);
+    // useEffect(() => {
+    //     const timer = setTimeout(() => {
+    //       onRedirect();
+    //     }, 4000);
     
-        return () => clearTimeout(timer); // Clear timeout if component unmounts
-      }, [onRedirect]);
+    //     return () => clearTimeout(timer); // Clear timeout if component unmounts
+    //   }, [onRedirect]);
     
   return (<div className='welcome' style={{height:"100vh", cursor:"progress"}}>
     <div  style={{ textAlign: 'center', paddingTop: '20px' }}>

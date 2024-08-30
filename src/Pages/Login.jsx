@@ -51,13 +51,24 @@ console.log(firebase.isLoggedIn)
     try {
       if (newUser) {
         const user = await firebase.signupUserWithPassEmail(email, password);
-        const userId= user.uid
+        const userId= await user.uid
         const data = await firebase.writeUserData(username,userId,email,password)
         console.log("User signed up:", data);
         // localStorage.setItem("username", username);
       } else {
-        const user = await firebase.loginWithEmailAndPass(email, password);
-        console.log("User logged in:", user);
+        try{
+          const user = await firebase.loginWithEmailAndPass(email, password);
+        if(!user){
+          console.log(error)
+          setError(true);
+          setErrorMsg(error?.message || "Invalid user crendential");
+        }
+        }catch{
+          console.log(error)
+          setError(true);
+          setErrorMsg(error.message);
+        }
+       
         // firebase.setUser(user)
       }
     } catch (error) {
@@ -184,6 +195,7 @@ console.log(firebase.isLoggedIn)
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                minLength={6}
               />
             </div>
             <div className="d-flex align-items-center justify-content-center m-2">

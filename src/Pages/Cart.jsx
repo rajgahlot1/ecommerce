@@ -1,27 +1,43 @@
 
 
-import { useDispatch, useSelector } from "react-redux";
+
 import { useEffect, useState } from "react";
 import { useFirebase } from "../Firebase";
 import { collection, addDoc } from "firebase/firestore";
-import { setMyId } from "../redux/MyIdSlice";
-import {
-  setInitialState,
-  addToCart,
-  deleteFromCart,
-  incrementQuantity,
-  decrementQuantity,
-} from "../redux/CartSlice";
+
+
 import Layout from "../Components/Layout";
 import { MdDeleteOutline } from "react-icons/md";
 import { FaIndianRupeeSign } from "react-icons/fa6";
 import BuyNowModels from "../BuyNowModels";
 import { useNavigate } from "react-router-dom";
 
-export default function CartPage() {
-  const navigate = useNavigate();
+export default function Cart() {
   const [user, setUser] = useState(null);
-  const [userId, setUserId] = useState();
+  const navigate = useNavigate();
+  const firebase = useFirebase();
+  const { fetchCartData, removeFromCart  } = firebase;
+  const [cartItems, setCartItems] = useState([]);
+  
+  useEffect(() => {
+    const data = firebase.userData;
+    setUser(data);
+  }, [firebase.userData]);
+
+  useEffect(() => {
+    const loadCartItems = async () => {
+      const items = await fetchCartData();
+      setCartItems(items);
+    };
+
+    loadCartItems();
+  }, [fetchCartData]);
+
+  const deleteCart = async (product) => {
+    await removeFromCart(product.id); // Call the function from firebase
+    setCartItems(cartItems.filter(item => item.id !== product.id)); // Remove item from UI
+  };
+
   const [addressInfo, setAddressInfo] = useState({
     name: "",
     address: "",
@@ -39,37 +55,10 @@ export default function CartPage() {
     }),
   });
 
-  const cartItems = useSelector((state) => state.cart);
-  const dispatch = useDispatch();
-  const firebase = useFirebase();
+ 
+ 
 
- const {myId}= useFirebase();
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const data = await firebase.userData;
-        const myId = await firebase.myId;
-        setUserId(myId);
-        console.log("hello rajaj ", myId);
-
-        setUser(data);
-
-        // Set the myId in the Redux store
-        if (myId) {
-          dispatch(setMyId(myId));
-
-          // Fetch cart data from local storage using myId
-          const storedCart = JSON.parse(localStorage.getItem(myId)) || [];
-          dispatch(setInitialState(storedCart));
-        }
-      } catch (error) {
-        console.error("Error fetching user data: ", error);
-      }
-    };
-
-    fetchData();
-  }, [firebase.userData, firebase.myId, dispatch]);
+  
 
   const BuyNowFunction = async () => {
     const now = new Date();
@@ -114,35 +103,30 @@ export default function CartPage() {
       console.error("Error adding order: ", error);
     }
   };
-
-  const handleIncrement = (id) => {
-    dispatch(incrementQuantity(id));
+  const handleIncrement = (productId) => {
+    setCartItems(prevItems =>
+      prevItems.map(item =>
+        item.id === productId ? { ...item, quantity: item.quantity + 1 } : item
+      )
+    );
   };
 
-  const handleDecrement = (id) => {
-    dispatch(decrementQuantity(id));
+  const handleDecrement = (productId) => {
+    setCartItems(prevItems =>
+      prevItems.map(item =>
+        item.id === productId && item.quantity > 1 ? { ...item, quantity: item.quantity - 1 } : item
+      )
+    );
   };
-
-  const deleteCart = (val) => {
-    dispatch(deleteFromCart(val));
-    const cartFromStorage = JSON.parse(localStorage.getItem(myId)) || [];
-
-    // Filter out the item to be deleted based on its id
-    const updatedCart = cartFromStorage.filter((item) => item.id !== val.id);
-
-    // Update local storage with the new cart array
-    localStorage.setItem(userId, JSON.stringify(updatedCart));
-
-    console.log("Delete success");
-  };
+  
 
   const CartItemTotal = cartItems.reduce(
-    (total, item) => total + item.quanity,
+    (total, item) => total + item.quantity,
     0,
   );
   
   const CartTotal = cartItems.reduce(
-    (total, item) => total + item.price * item.quanity,
+    (total, item) => total + item.price * item.quantity,
     0,
   );
   console.log("quen",CartTotal)
@@ -150,7 +134,7 @@ export default function CartPage() {
   return (
     <>
       <Layout>
-        <div className=" p-2  d-flex pb-5 flex-column">
+        <div className="Cart_main p-2  d-flex pb-5 flex-column">
           <h1 className="text-center">Shopping Cart</h1>
           <div className="Cart_main_second d-flex flex-wrap justify-content-center justify-content-lg-between gap-4 mt-3">
             <div className="Cart_First d-flex flex-column gap-4">
@@ -163,7 +147,7 @@ export default function CartPage() {
                       title,
                       price,
                       productImgUrl,
-                      quanity,
+                      quantity,
                       category,
                     } = val;
                     return (
@@ -178,7 +162,7 @@ export default function CartPage() {
                             src={productImgUrl}
                             alt="Product_img"
                             className="img-fluid"
-                            style={{ width: "80px", aspectRatio: "1" }}
+                            style={{ width: "80px",height:"80px" }}
                           />
                           <div>
                             <h4 className="pb-0 mb-0">{title}</h4>
@@ -220,7 +204,7 @@ export default function CartPage() {
                             >
                               -
                             </button>
-                            {quanity ? quanity : 0}
+                            {quantity }
                             <button
                               onClick={() => handleIncrement(val.id)}
                               style={{
