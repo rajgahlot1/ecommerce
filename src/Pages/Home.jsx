@@ -10,7 +10,16 @@ import Track from '../Components/Track';
 import Testimonial from '../Components/Testimonial';
 // import Nav from "./Nav.js"
 import Category from '../Components/Category';
+import { useFirebase } from '../Firebase';
+import { useNavigate } from 'react-router-dom';
+
 const Home = () => {
+  const firebase = useFirebase()
+  const navigate= useNavigate()
+useEffect(()=>{
+   if(firebase.user=== null){ navigate('/LoginPage')}
+
+},[firebase])
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
