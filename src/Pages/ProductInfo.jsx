@@ -3,7 +3,7 @@ import Layout from "../Components/Layout";
 import { FaRegStar } from "react-icons/fa";
 import { FaStarHalfAlt } from "react-icons/fa";
 import { useParams } from "react-router-dom";
-import { useFirebase } from "./Firebase";
+import { useFirebase } from "../Firebase";
 import Loader from "../Loader/Loader";
 import { useEffect, useState } from "react";
 import { getDocs, collection, doc, getDoc } from "firebase/firestore";
